@@ -1,5 +1,5 @@
 # Control Flow Demo
-In this project, I have used clean architecture with a VMI pattern.
+In this project, I have used clean architecture with a MVI pattern.
 
 # Libraries included in this project
 [`control-flow`](https://github.com/CodeStarX/ControlFlow) `jetpack compose` `kotlin coroutine` `coroutine flow` `retrofit` `okhttp` `view-model` `hilt` `timber`
