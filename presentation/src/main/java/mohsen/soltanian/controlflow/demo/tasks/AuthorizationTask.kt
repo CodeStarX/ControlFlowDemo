@@ -6,6 +6,7 @@ import io.github.codestarx.helper.failureMode
 import io.github.codestarx.helper.successMode
 import io.github.codestarx.interfaces.TaskProcessor
 import io.github.codestarx.models.ConditionData
+import io.github.codestarx.models.RetryStrategy
 import io.github.codestarx.models.TaskInfo
 import io.github.codestarx.models.TransformData
 import io.github.codestarx.status.TaskStatus
@@ -17,6 +18,7 @@ import mohsen.soltanian.controlflow.demo.core.domain.usecases.AuthorizationUseCa
 import mohsen.soltanian.demo.controlflow.data.extensions.fromJson
 import mohsen.soltanian.demo.controlflow.data.extensions.toJson
 import org.json.JSONObject
+import java.util.concurrent.TimeoutException
 
 class AuthorizationTask(
     private val useCase: AuthorizationUseCase
@@ -25,6 +27,11 @@ class AuthorizationTask(
         get() = TaskInfo().apply {
             index = 0
             name = AuthorizationTask::class.java.name
+            retry = RetryStrategy().apply {
+                count = 3
+                causes = setOf(TimeoutException::class)
+                delay = 1000L
+            }
             runIn = Dispatchers.IO
         }
 

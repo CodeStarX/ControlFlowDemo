@@ -78,8 +78,8 @@ val engine = ControlFlow(object: WorkFlowTracker {
         }
 ```
 
-
-Note: the output of the first task undergoes conversion via the `transformer` method before being passed to the second task.
+Note: To activate the Retry mechanism, I've configured the properties of the [`AuthorizationTask`](https://github.com/CodeStarX/ControlFlowDemo/tree/master/presentation/src/main/java/mohsen/soltanian/controlflow/demo/tasks/AuthorizationTask.kt/) class.
+In case of a `TimeoutException` error, the task will be retried thrice, with a one-second interval between each attempt.
 
 ```kotlin
 class AuthorizationTask(
@@ -89,8 +89,29 @@ class AuthorizationTask(
         get() = TaskInfo().apply {
             index = 0
             name = AuthorizationTask::class.java.name
+            retry = RetryStrategy().apply {
+                count = 3
+                causes = setOf(TimeoutException::class)
+                delay = 1000L
+            }
             runIn = Dispatchers.IO
         }
+
+    override suspend fun doProcess(param: Any?): Flow<TaskStatus> {
+        ...
+    }
+}
+```
+
+
+Note: the output of the first task undergoes conversion via the `transformer` method before being passed to the second task.
+
+```kotlin
+class AuthorizationTask(
+    private val useCase: AuthorizationUseCase
+) : Dispatcher(), TaskProcessor {
+    override val info: TaskInfo
+        get() = ...
 
     override suspend fun doProcess(param: Any?): Flow<TaskStatus> {
         return launchFlow(action =  { useCase(params = BaseUseCase.None()) },
