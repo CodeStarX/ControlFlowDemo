@@ -61,7 +61,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
-    val controlflow= "1.0.0-alpha09"
+    val controlflow= "1.0.0-alpha10"
     implementation("io.github.codestarx:control-flow:$controlflow")
 
     val hiltNavigationCompose= "1.0.0"
