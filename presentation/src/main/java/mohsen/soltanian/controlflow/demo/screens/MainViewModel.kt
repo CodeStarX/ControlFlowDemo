@@ -77,8 +77,9 @@ class MainViewModel @Inject constructor(
             }
 
         }).apply {
-            startWith(first = AuthorizationTask(useCase = useCase))
-            then(next = SaveAccessTokenTask(cashManager = sharedPrefCashManager))
+            startWith(first = AuthorizationTask(useCase = useCase).apply {
+                then(subtask= SaveAccessTokenTask(cashManager = sharedPrefCashManager))
+            })
             then(next = GetHotelsListTask(useCase = getHotelsUseCase))
         }
         engine.useRollbackStatusTracker(object : RollbackStatusTracker {
