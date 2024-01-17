@@ -30,6 +30,7 @@ class MainViewModel @Inject constructor(
     private val sharedPrefCashManager: SharedPrefCashManager
 ): MviViewModel<ViewState<MainContract.State>, MainContract.Event>() {
 
+    private var engine: ControlFlow? = null
     override fun onTriggerEvent(eventType: MainContract.Event) {
         when(eventType){
             is MainContract.Event.DoAuthorizationAndGetHotels -> {
@@ -38,7 +39,7 @@ class MainViewModel @Inject constructor(
         }
     }
     private fun executeTasks() {
-        val engine = ControlFlow(object: WorkFlowTracker {
+        engine = ControlFlow(object: WorkFlowTracker {
 
             override fun started(controlFlow: ControlFlow) {
                 Timber.tag("TAG").e("flow Started")
@@ -82,7 +83,7 @@ class MainViewModel @Inject constructor(
             })
             then(next = GetHotelsListTask(useCase = getHotelsUseCase))
         }
-        engine.useRollbackStatusTracker(object : RollbackStatusTracker {
+        engine?.useRollbackStatusTracker(object : RollbackStatusTracker {
             override fun failure(controlFlow: ControlFlow, info: RollbackInfo, errorCause: Throwable?) {
                 Timber.tag("TAG").e("An error occurred in rollback task ${info.name}, errorCause is: ${errorCause?.message}")
             }
@@ -92,7 +93,7 @@ class MainViewModel @Inject constructor(
             }
 
         })
-        engine.useTaskStatusTracker(object : TaskStatusTracker {
+        engine?.useTaskStatusTracker(object : TaskStatusTracker {
             override fun failure(controlFlow: ControlFlow, info: TaskInfo, errorCause: Throwable?) {
                 setState(state = ViewState.Error(throwable = errorCause))
             }
@@ -110,7 +111,12 @@ class MainViewModel @Inject constructor(
             }
 
         })
-        engine.start(runAutomaticallyRollback = true)
+        engine?.start(runAutomaticallyRollback = true)
 
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        engine?.stop()
     }
 }
